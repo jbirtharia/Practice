@@ -1,9 +1,6 @@
 package oca.streams;
 
 import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -70,11 +67,11 @@ public class StreamApi {
          compareTo() method.*/
         List<Integer> sortedListWithDefaultMethod = marks.stream().sorted().collect(Collectors.toList());
 
-        List<Integer> sortedListWithoutDefaultMethod = marks.stream().sorted((i,j) -> i.compareTo(j))
+        List<Integer> sortedListWithoutDefaultMethod = marks.stream().sorted(Integer::compareTo)
                 .collect(Collectors.toList());
 
         List<Integer> sortedListWithoutDefaultMethodInDecreasingOrder = marks.stream()
-                .sorted((i,j) -> j.compareTo(i))
+                .sorted(Comparator.reverseOrder())
                 .collect(Collectors.toList());
 
         System.out.println("Sorted in increasing order with default sorted method ::: "+sortedListWithDefaultMethod);
@@ -97,7 +94,7 @@ public class StreamApi {
         interface is functional interface so we can se lambda function.*/
         List<Integer> decreaseOrderSortedList = marks.stream().sorted((i,j) -> (i<j)?1:(i>j)?-1:0).collect(Collectors.toList());
 
-        List<Integer> increaseOrderSortedList = marks.stream().sorted((i,j) -> (i<j)?-1:(i>j)?1:0).collect(Collectors.toList());
+        List<Integer> increaseOrderSortedList = marks.stream().sorted((i,j) -> i.compareTo(j)).collect(Collectors.toList());
 
         System.out.println("Sorted in increasing order ::: "+increaseOrderSortedList);
         System.out.println("Sorted in decreasing order ::: "+decreaseOrderSortedList);
@@ -114,13 +111,13 @@ public class StreamApi {
         cricketers.add("Irfan Pathan");
 
         List<String> naturalSorting = cricketers.stream()
-                .sorted((i,j) -> i.compareToIgnoreCase(j)).collect(Collectors.toList());
+                .sorted(String::compareToIgnoreCase).collect(Collectors.toList());
 
         List<String> sortedByLengthAscending = cricketers.stream()
-                .sorted((i,j) -> (i.length()>j.length())?1:(j.length()>i.length())?-1:0).collect(Collectors.toList());
+                .sorted(Comparator.comparingInt(String::length)).collect(Collectors.toList());
 
         List<String> sortedByLengthDescending = cricketers.stream()
-                .sorted((i,j) -> (i.length()>j.length())?-1:(j.length()>i.length())?1:0).collect(Collectors.toList());
+                .sorted((i,j) -> Integer.compare(j.length(), i.length())).collect(Collectors.toList());
 
         System.out.println("Cricketers sorted in natural order : "+naturalSorting);
         System.out.println("Cricketers sorted in increasing order according to thier name : "+sortedByLengthAscending);
@@ -128,7 +125,7 @@ public class StreamApi {
 
     }
 
-    public static void main8(String[] args) {
+    public static void main(String[] args) {
         ArrayList<Integer> marks = new ArrayList<>();
         marks.add(30);
         marks.add(53);
@@ -138,11 +135,13 @@ public class StreamApi {
         marks.add(11);
         marks.add(90);
 
-        int minimumMarks = marks.stream().min((i,j) -> i.compareTo(j)).get();
-        int maximumMarks = marks.stream().min((i,j) -> j.compareTo(i)).get();
+        Optional<Integer> minimumMarks = marks.stream().min(Integer::compareTo);
+        Optional<Integer> maximumMarks = marks.stream().min((i,j) -> j.compareTo(i));
 
-        System.out.println("Minimum marks "+minimumMarks);
-        System.out.println("Maximum marks "+maximumMarks);
+        System.out.print("Minimum marks : ");
+        minimumMarks.ifPresent(System.out::println);
+        System.out.print("Maximum marks  : ");
+        maximumMarks.ifPresent(System.out::println);
     }
 
 
@@ -157,17 +156,16 @@ public class StreamApi {
         marks.add(90);
 
         //forEach method takes as Consumer interface as argument
-        marks.stream().forEach(i->System.out.print(" "+i*i));
+        marks.forEach(i->System.out.print(" "+i*i));
 
         marks.stream().forEach(System.out::println);
         //marks.stream().forEachOrdered(System.out::println);
 
-        Integer [] i = marks.stream().toArray(Integer[]::new);
+        Integer [] i = marks.toArray(new Integer[0]);
         Stream.of(i).forEach(System.out::println);
     }
 
     public static void main10(String[] args) {
-
         List<Integer> list = Stream.of(12,34,13,46,75,34,53,67).collect(Collectors.toList());
         list.forEach(System.out::println);
     }
@@ -274,10 +272,10 @@ public class StreamApi {
         students.add(new ExamStudent(3, "Karthick", 98));
         students.add(new ExamStudent(4, "Mohit", 40));
 
-        // Passing isNotSachin() method to test() method of Predicate interface. This is method reference.
-        // In lambda expression we pass method body as argument.
-        // Method Reference : Passing a implemented method to FunctionalInterface method. If we see any kind of this scenario
-        // then we can use method reference.
+        /* Passing isNotSachin() method to test() method of Predicate interface. This is method reference.
+          In lambda expression we pass method body as argument.
+          Method Reference : Passing a implemented method to FunctionalInterface method. If we see any kind of this scenario
+          then we can use method reference.*/
         students.stream().filter(StreamApi::isNotSachin).forEach(System.out::println);
     }
 
@@ -285,22 +283,19 @@ public class StreamApi {
         return !examStudent.getName().equals("Sachin");
     }
 
-    public static void main(String[] args) {
-        List<MobileCompany> mobileCompanies = Arrays.asList(new MobileCompany("Airtel",Arrays.asList(
-                new User("Veru",30,true),
-                new User("MS",24,true),
-                new User("Sachin",40,false),
-                new User("Rohit",34,true))));
+    public static void main25(String[] args) {
+        List<MobileCompany> mobileCompanies = Collections.singletonList(new MobileCompany("Airtel", Arrays.asList(
+                new User("Veru", 30, true),
+                new User("MS", 24, true),
+                new User("Sachin", 40, false),
+                new User("Rohit", 34, true))));
 
         // Flat map is used when we are trying to perform stream operation on a list of list.
         // For example List<List<String>>
-        mobileCompanies.stream().map(mobileCompany -> mobileCompany.getUsers())
-                .flatMap(users -> users.stream())
-                .filter(user -> user.getIsValid())
+        mobileCompanies.stream().map(MobileCompany::getUsers)
+                .flatMap(Collection::stream)
+                .filter(User::getIsValid)
                 .collect(Collectors.toList()).forEach(System.out::println);
-
-
-
     }
 
 }

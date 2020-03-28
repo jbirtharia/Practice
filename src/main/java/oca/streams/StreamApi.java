@@ -253,7 +253,7 @@ public class StreamApi {
         students.stream().sorted(Comparator.comparingInt(Student::getMarks).reversed()).limit(3).forEach(Student::display);
     }
 
-    public static void main(String[] args) {
+    public static void main23(String[] args) {
 
         List<ExamStudent> students = new ArrayList<>();
         students.add(new ExamStudent(1, "Sachin", 18));
@@ -265,6 +265,42 @@ public class StreamApi {
 
         // Passing examHandler method to rules method of TestRules interface
         students.forEach(examStudent -> new Exam().doExam(examStudent,Examiner::examHandler));
+    }
+
+    public static void main24(String[] args) {
+        List<ExamStudent> students = new ArrayList<>();
+        students.add(new ExamStudent(1, "Sachin", 18));
+        students.add(new ExamStudent(2, "Rahul", 65));
+        students.add(new ExamStudent(3, "Karthick", 98));
+        students.add(new ExamStudent(4, "Mohit", 40));
+
+        // Passing isNotSachin() method to test() method of Predicate interface. This is method reference.
+        // In lambda expression we pass method body as argument.
+        // Method Reference : Passing a implemented method to FunctionalInterface method. If we see any kind of this scenario
+        // then we can use method reference.
+        students.stream().filter(StreamApi::isNotSachin).forEach(System.out::println);
+    }
+
+    public static boolean isNotSachin (ExamStudent examStudent){
+        return !examStudent.getName().equals("Sachin");
+    }
+
+    public static void main(String[] args) {
+        List<MobileCompany> mobileCompanies = Arrays.asList(new MobileCompany("Airtel",Arrays.asList(
+                new User("Veru",30,true),
+                new User("MS",24,true),
+                new User("Sachin",40,false),
+                new User("Rohit",34,true))));
+
+        // Flat map is used when we are trying to perform stream operation on a list of list.
+        // For example List<List<String>>
+        mobileCompanies.stream().map(mobileCompany -> mobileCompany.getUsers())
+                .flatMap(users -> users.stream())
+                .filter(user -> user.getIsValid())
+                .collect(Collectors.toList()).forEach(System.out::println);
+
+
+
     }
 
 }
